@@ -11,6 +11,7 @@ from fuzzywuzzy import process
 # * Gid Imports -->
 import gidlogger as glog
 from typing import Union
+from gidconfig.data.enums import Get
 # endregion [Imports]
 
 
@@ -20,78 +21,6 @@ log = glog.aux_logger(__name__)
 log.info(glog.imported(__name__))
 
 # endregion [Logging]
-
-# region [Constants]
-
-
-# endregion [Constants]
-
-
-# region [Global_Functions]
-
-
-# endregion [Global_Functions]
-
-
-# region [Configs]
-
-
-# endregion [Configs]
-
-
-# region [Extension_Registration]
-
-
-# endregion [Extension_Registration]
-
-
-# region [Factories]
-
-
-# endregion [Factories]
-
-
-# region [Main_Function]
-
-
-# endregion [Main_Function]
-
-
-# region [Main_Window_Widget]
-
-
-# endregion [Main_Window_Widget]
-
-
-# region [Paths]
-
-
-# endregion [Paths]
-
-
-# region [Setting_Window_Widget]
-
-
-# endregion [Setting_Window_Widget]
-
-
-# region [Singleton_Objects]
-
-
-# endregion [Singleton_Objects]
-
-
-# region [Support_Objects]
-class Get(enum.Enum):
-    basic = enum.auto()
-    boolean = enum.auto()
-    int = enum.auto()
-    list = enum.auto()
-    path = enum.auto()
-    datetime = enum.auto()
-
-
-# endregion [Support_Objects]
 
 
 # region [Class_1]
