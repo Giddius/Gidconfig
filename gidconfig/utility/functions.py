@@ -10,7 +10,7 @@ import gidlogger as glog
 
 # endregion[Imports]
 
-__updated__ = '2020-11-14 16:05:28'
+__updated__ = '2020-11-14 17:08:46'
 
 
 # region [Logging]
@@ -92,11 +92,9 @@ def writeit(in_file, in_data, append=False, in_encoding='utf-8', in_errors=None)
 def appendwriteit(in_file, in_data, in_encoding='utf-8'):
     with open(in_file, 'a', encoding=in_encoding) as appendwrite_file:
         appendwrite_file.write(in_data)
-# -------------------------------------------------------------- readbin -------------------------------------------------------------- #
 
 
 def readbin(in_file):
-    # -------------------------------------------------------------- readbin -------------------------------------------------------------- #
     """
     Reads a binary file.
 
