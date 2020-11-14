@@ -3,6 +3,6 @@ Configuration provider package, that exposes the section as attribute and also a
 Through the Factory/Strategy the config objects are singletons as long as they point to the same file.
 """
 
-__version__ = '0.1'
+__version__ = '0.1.1'
 
 from .standard import *
