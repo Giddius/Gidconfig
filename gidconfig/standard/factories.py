@@ -11,7 +11,7 @@ from gidconfig.utility.functions import pathmaker
 
 # endregion [Imports]
 
-__updated__ = '2020-11-14 15:10:42'
+__updated__ = '2020-11-14 17:59:16'
 
 # region [Logging]
 
@@ -32,7 +32,7 @@ class ConfigRental:
         cls.appdata = appdata_object
 
     @classmethod
-    def get_config(cls, file_name, cfg_folder=None):
+    def get_config(cls, file_name, cfg_folder=None, **attribute_edits):
         if cls.appdata is None and cfg_folder is None:
             raise FileExistsError('appdata has not been set')
         _folder = cls.appdata['config'] if cfg_folder is None else pathmaker(cfg_folder)
