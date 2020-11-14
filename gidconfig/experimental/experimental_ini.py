@@ -1,19 +1,17 @@
 # region [Imports]
 
 # * Standard Library Imports -->
-import time
+from datetime import datetime, timedelta
+from functools import partial
 from collections import namedtuple
 from configparser import ConfigParser
-from time import time, sleep
-import timeit
-import re
-from datetime import datetime, timedelta
-from functools import partial, partialmethod
-# * Third Party Imports -->
 
 # * Gid Imports -->
 import gidlogger as glog
+
+# * Local Imports -->
 from gidconfig.experimental.experimental_abstract import GidAttConfigAbstract
+
 # endregion[Imports]
 
 __updated__ = '2020-11-14 01:41:32'
