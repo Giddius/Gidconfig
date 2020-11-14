@@ -7,7 +7,11 @@ module = "gidconfig"
 author = "Giddius"
 classifiers = ["License :: OSI Approved :: MIT License"]
 description-file = "readme.md"
-requires = ["pytoml>=0.1.21"]
+requires = [
+"pytoml>=0.1.21",
+"fuzzywuzzy==0.18.0",
+"gidlogger==0.1.2"
+]
 
 
 
