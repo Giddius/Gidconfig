@@ -614,3 +614,6 @@ _project_meta.env
 private_quick_scripts/
 ui_conv_targets.json
 tools/ui_conv_targets.json
+create_venv_logs/
+tools/create_venv_logs/create_venv.errors
+tools/create_venv.cmd

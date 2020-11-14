@@ -276,9 +276,9 @@ echo.
 rem Echo ################# Installing PyQtdoc
 rem call pip install --no-cache-dir --force-reinstall PyQtdoc
 rem echo.
-echo -------------------calling pyqt5toolsinstalluic.exe-----------------------------
-call ..\.venv\Scripts\pyqt5toolsinstalluic.exe
-echo.
+rem echo -------------------calling pyqt5toolsinstalluic.exe-----------------------------
+rem call ..\.venv\Scripts\pyqt5toolsinstalluic.exe
+rem echo.
 echo.
 rem call ..\.venv\Scripts\pyqtdoc.py register
 echo.

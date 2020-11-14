@@ -7,7 +7,7 @@ module = "gidconfig"
 author = "Giddius"
 classifiers = ["License :: OSI Approved :: MIT License"]
 description-file = "readme.md"
-requires = []
+requires = ["pytoml>=0.1.21"]
 
 
 
