@@ -30,8 +30,8 @@ log.info(glog.imported(__name__))
 # region [Class_1]
 
 class ConfigHandler(configparser.ConfigParser):
-    def __init__(self, config_file=None, auto_read=True, auto_save=True, **kwargs):
-        super().__init__(**kwargs, allow_no_value=True)
+    def __init__(self, config_file=None, auto_read=True, auto_save=True, allow_no_value=True, **kwargs):
+        super().__init__(**kwargs, allow_no_value=allow_no_value)
         self.config_file = '' if config_file is None else config_file
         self.auto_read = auto_read
         self.auto_save = auto_save

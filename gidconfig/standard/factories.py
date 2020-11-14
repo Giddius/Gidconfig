@@ -11,7 +11,7 @@ from gidconfig.utility.functions import pathmaker
 
 # endregion [Imports]
 
-__updated__ = '2020-11-14 17:59:16'
+__updated__ = '2020-11-14 18:06:22'
 
 # region [Logging]
 
@@ -40,7 +40,7 @@ class ConfigRental:
 
         _out_cfg = cls.config_instances.get(_file, None)
         if _out_cfg is None:
-            _out_cfg = ConfigHandler(config_file=_file)
+            _out_cfg = ConfigHandler(config_file=_file, **attribute_edits)
             cls.config_instances[_file] = _out_cfg
         return _out_cfg
 
