@@ -12,17 +12,6 @@ log.info(glog.imported(__name__))
 
 # endregion [Logging]
 
-# region [Constants]
-
-
-# endregion [Constants]
-
-
-# region [Functions_2]
-
-
-# endregion [Functions_2]
-
 
 # region [Main_Exec]
 if __name__ == '__main__':

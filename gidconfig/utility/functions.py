@@ -10,7 +10,7 @@ import gidlogger as glog
 
 # endregion[Imports]
 
-__updated__ = '2020-11-14 17:08:46'
+__updated__ = '2020-11-15 11:24:09'
 
 
 # region [Logging]
@@ -50,11 +50,8 @@ def pathmaker(first_segment, *in_path_segments, rev=False):
 
     return _path.strip()
 
-# -------------------------------------------------------------- writebin -------------------------------------------------------------- #
-
 
 def writebin(in_file, in_data):
-    # -------------------------------------------------------------- writebin -------------------------------------------------------------- #
     """
     Writes a string to binary.
 

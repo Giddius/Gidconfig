@@ -1,6 +1,5 @@
 import pytest
 from gidconfig.experimental.experimental_ini import GidAttConfigIni
-from tempfile import TemporaryDirectory
 import os
 
 SAMPLE_INI_CONTENT = """[one]
@@ -28,12 +27,11 @@ exp_timedelta_neg = -TIMEDELTA- negative days: 10, hours: 6, minutes: 7, seconds
 
 
 @pytest.fixture
-def sample_ini_file():
-    with TemporaryDirectory() as temp_test_dir:
-        _path = os.path.join(temp_test_dir, 'sample_config.ini')
-        with open(_path, 'w') as samp_conf_file:
-            samp_conf_file.write(SAMPLE_INI_CONTENT)
-        yield _path
+def sample_ini_file(tmpdir):
+    _path = tmpdir.join('sample_config.ini')
+    with open(_path, 'w') as samp_conf_file:
+        samp_conf_file.write(SAMPLE_INI_CONTENT)
+    yield _path
 
 
 @pytest.fixture
