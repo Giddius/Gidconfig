@@ -15,7 +15,7 @@ import gidlogger as glog
 
 # * Local Imports -->
 from gidconfig.data.enums import Get
-
+from gidconfig.utility.functions import readit
 # endregion [Imports]
 
 
@@ -34,18 +34,20 @@ class ConfigHandler(configparser.ConfigParser):
         self.auto_read = auto_read
         self.auto_save = auto_save
         self._method_select = {Get.basic: self.get, Get.boolean: self.getboolean, Get.int: self.getint, Get.list: self.getlist, Get.path: self.get_path, Get.datetime: self.get_datetime}
-
+        self.annotation_replacements = {'[DEFAULT]': 'Options in this section are used if those options are not set in a Section'}
         if self.auto_read is True:
             self.read(self.config_file)
 
-    def getlist(self, section, key, delimiter=',', as_set=False):
-        _raw = self.get(section, key).strip()
+    def getlist(self, section, option, delimiter=',', as_set=False, casefold_items=False):
+        _raw = self.get(section, option).strip()
         if _raw.endswith(delimiter):
             _raw = _raw.rstrip(delimiter)
         if _raw.startswith(delimiter):
             _raw = _raw.lstrip(delimiter).strip()
         _out = _raw.replace(delimiter + ' ', delimiter).split(delimiter)
         _out = list(map(lambda x: x.strip(), _out))
+        if casefold_items is True:
+            _out = list(map(lambda x: x.casefold(), _out))
         if as_set is True:
             _out = set(_out)
         return _out
@@ -60,8 +62,8 @@ class ConfigHandler(configparser.ConfigParser):
             _out = set(_out)
         return _out
 
-    def get_path(self, section, key, cwd_symbol='+cwd+'):
-        _raw_path = self.get(section, key)
+    def get_path(self, section, option, cwd_symbol='+cwd+'):
+        _raw_path = self.get(section, option)
         if cwd_symbol in _raw_path:
             _out = _raw_path.replace(cwd_symbol, os.getcwd()).replace('\\', '/')
         elif '+userdata+' in _raw_path:
@@ -81,8 +83,8 @@ class ConfigHandler(configparser.ConfigParser):
         log.debug("with a fuzzymatch, the term '%s' was best matched to '%s' with and Levenstein-distance of %s", in_term, _rating_list[0][0], _rating_list[0][1])
         return _rating_list[0][0]
 
-    def get_timedelta(self, section, key, amount_seperator=' ', delta_seperator=','):
-        _raw_timedelta = self.get(section, key)
+    def get_timedelta(self, section, option, amount_seperator=' ', delta_seperator=','):
+        _raw_timedelta = self.get(section, option)
         if _raw_timedelta != 'notset':
             _raw_timedelta_list = _raw_timedelta.split(delta_seperator)
             _arg_dict = {'days': 0,
@@ -98,16 +100,16 @@ class ConfigHandler(configparser.ConfigParser):
                 _arg_dict[_key] = float(_amount) if '.' in _amount else int(_amount)
             return timedelta(**_arg_dict)
 
-    def get_datetime(self, section, key, dtformat=None):
-        _date_time_string = self.get(section, key)
+    def get_datetime(self, section, option, dtformat=None):
+        _date_time_string = self.get(section, option)
         if _date_time_string == "notset":
             return None
         _dtformat = '%Y-%m-%d %H:%M:%S' if dtformat is None else dtformat
         return datetime.strptime(_date_time_string, _dtformat).astimezone()
 
-    def set_datetime(self, section, key, datetime_object, dtformat=None):
+    def set_datetime(self, section, option, datetime_object, dtformat=None):
         _dtformat = '%Y-%m-%d %H:%M:%S' if dtformat is None else format
-        self.set(section, key, datetime_object.strftime(_dtformat))
+        self.set(section, option, datetime_object.strftime(_dtformat))
         if self.auto_save is True:
             self.save()
 
@@ -132,6 +134,17 @@ class ConfigHandler(configparser.ConfigParser):
         _configfile = self.config_file if filenames is None else filenames
 
         super().read(self.config_file)
+
+    def set_annotation_replacement(self, replacements: dict):
+        for key, value in replacements.items():
+            self.annotation_replacements[key] = value
+
+    def get_annotated_config(self):
+        content = readit(self.config_file)
+        for target, annotation in self.annotation_replacements.items():
+            replacement = f";; {annotation}\n{target}"
+            content = content.replace(target, replacement)
+        return content
 
 
 if __name__ == '__main__':
