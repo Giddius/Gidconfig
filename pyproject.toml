@@ -8,6 +8,6 @@ author = "Giddius"
 home-page = "https://github.com/Giddius/Gidconfig"
 classifiers = ["License :: OSI Approved :: MIT License"]
 description-file = "readme.md"
-requires = ["fuzzywuzzy>=0.18.0", "gidlogger>=0.1.4"]
+requires = ["fuzzywuzzy>=0.18.0", "gidlogger>=0.1.7"]
 
 [tool.flit.scripts]

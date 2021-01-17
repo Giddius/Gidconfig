@@ -146,6 +146,9 @@ class ConfigHandler(configparser.ConfigParser):
             content = content.replace(target, replacement)
         return content
 
+    def __contains__(self, item: object) -> bool:
+        return item in self.sections()
+
 
 if __name__ == '__main__':
     pass
