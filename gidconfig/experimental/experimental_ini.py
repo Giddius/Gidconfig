@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from functools import partial
 from collections import namedtuple
 from configparser import ConfigParser
-
+from pprint import pprint
 # * Gid Imports -->
 import gidlogger as glog
 
@@ -46,10 +46,26 @@ class GidAttConfigIni(GidAttConfigAbstract):
                            'float': self.typus_tuple(float, '-FLOAT-', self._float_transformer),
                            'datetime': self.typus_tuple(datetime, '-DATETIME-', self._datetime_transform),
                            'timedelta': self.typus_tuple(timedelta, '-TIMEDELTA-', self._timedelta_transform)}
+        self.stored_comments = {}
+
+    # def _store_comments(self):
+    #     self.stored_comments = {}
+    #     _section = ''
+    #     with open(self.config_file, 'r') as conf_f:
+    #         content_lines = conf_f.read().splitlines()
+    #     for index, line in enumerate(content_lines):
+    #         if line.startswith('['):
+    #             _section = line
+    #         if line.startswith('#'):
+    #             if _section not in self.stored_comments:
+    #                 self.stored_comments[_section] = []
+    #             self.stored_comments[_section].append((content_lines[index + 1], line))
 
     def load(self):
+
         for added_attribute in self.added_attributes:
             delattr(self, added_attribute)
+        # self._store_comments()
         self.added_attributes = []
         self.configparser.read(self.config_file)
         for section in self.configparser.sections():
@@ -63,6 +79,7 @@ class GidAttConfigIni(GidAttConfigAbstract):
                 _value = self.configparser.get(section, option)
                 _value = self._check_convert_int(_value)
                 _value = self._check_convert_boolean(_value)
+                _value = self._check_convert_float(_value)
                 for _, typus_item in self.typus_data.items():
                     try:
                         if typus_item.prefix in _value:
@@ -79,6 +96,7 @@ class GidAttConfigIni(GidAttConfigAbstract):
             _out = list(map(self._strip_it, _out))
             _out = list(map(self._check_convert_int, _out))
             _out = list(map(self._check_convert_boolean, _out))
+            _out = list(map(self._check_convert_float, _out))
         elif direction == 'save':
             _item_string = ', '.join(map(str, in_value))
             _out = self.typus_data['list'].prefix + ' ' + _item_string
@@ -107,6 +125,18 @@ class GidAttConfigIni(GidAttConfigAbstract):
         try:
             _out = int(item)
         except ValueError:
+            _out = item
+        except TypeError:
+            _out = item
+        return _out
+
+    @ staticmethod
+    def _check_convert_float(item):
+        try:
+            _out = float(item)
+        except ValueError:
+            _out = item
+        except TypeError:
             _out = item
         return _out
 
@@ -161,6 +191,12 @@ class GidAttConfigIni(GidAttConfigAbstract):
                     value = typus_item.transformer(value, direction='save')
             self.configparser.set(section, key, str(value))
         self.save()
+
+    def add_comment(self, section, option, comment):
+        orig_value = self.configparser.get(section, option)
+        self.configparser.remove_option(section, option)
+        self.configparser.set(section, ';' + comment, '')
+        self.configparser.set(section, option, orig_value)
 
     def new_section(self, section_name, **options):
         self.configparser.add_section(section_name)
