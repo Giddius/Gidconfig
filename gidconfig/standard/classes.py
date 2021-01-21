@@ -159,10 +159,10 @@ class ConfigHandler(configparser.ConfigParser):
         for section, value in self.saved_comments.items():
             for option, comment in value:
                 self.add_comment(section, option, value)
-            with open(self.config_file, 'w') as confile:
-                self.write(confile)
-            self._clean_comments()
-            self.read()
+        with open(self.config_file, 'w') as confile:
+            self.write(confile)
+        self._clean_comments()
+        self.read()
 
     def read(self, filenames=None):
 
