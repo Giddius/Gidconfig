@@ -132,6 +132,8 @@ class GidAttConfigIni(GidAttConfigAbstract):
 
     @ staticmethod
     def _check_convert_float(item):
+        if isinstance(item, bool):
+            return item
         try:
             _out = float(item)
         except ValueError:
