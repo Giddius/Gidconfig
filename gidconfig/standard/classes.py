@@ -38,30 +38,6 @@ class ConfigHandler(configparser.ConfigParser):
         if self.auto_read is True:
             self.read(self.config_file)
 
-        self.saved_comments = {}
-
-    def _store_comments(self, config_file):
-        self.stored_comments = {}
-        _section = ''
-        with open(config_file, 'r') as conf_f:
-            content_lines = conf_f.read().splitlines()
-        for index, line in enumerate(content_lines):
-            if line.startswith('['):
-                _section = line.replace('[', '').replace(']', '').strip()
-            if line.startswith(';'):
-                if _section not in self.stored_comments:
-                    self.stored_comments[_section] = []
-                self.stored_comments[_section].append((content_lines[index + 1].split('=')[0].strip(), line.replace(';', '')))
-
-    def _clean_comments(self):
-        with open(self.config_file, 'r') as in_conf:
-            content = in_conf.read()
-        with open(self.config_file, 'w') as out_conf:
-            for line in content.splitlines():
-                if line.startswith(';'):
-                    line = line.lstrip('=').strip()
-                out_conf.write(line + '\n')
-
     def getlist(self, section, option, delimiter=',', as_set=False, casefold_items=False):
         _raw = self.get(section, option).strip()
         if _raw.endswith(delimiter):
@@ -146,28 +122,17 @@ class ConfigHandler(configparser.ConfigParser):
         if self.auto_save is True:
             self.save()
 
-    def add_comment(self, section, option, comment):
-        orig_value = self.get(section, option)
-        self.remove_option(section, option)
-        self.set(section, ';' + comment, '')
-        self.set(section, option, orig_value)
-
     def enum_get(self, section: str, option: str, typus: Get = Get.basic):
         return self._method_select.get(typus, self.get)(section, option)
 
     def save(self):
-        for section, value in self.saved_comments.items():
-            for option, comment in value:
-                self.add_comment(section, option, value)
         with open(self.config_file, 'w') as confile:
             self.write(confile)
         self._clean_comments()
         self.read()
 
     def read(self, filenames=None):
-
         _configfile = self.config_file if filenames is None else filenames
-        self._store_comments(_configfile)
         super().read(self.config_file)
 
     def set_annotation_replacement(self, replacements: dict):
@@ -183,6 +148,9 @@ class ConfigHandler(configparser.ConfigParser):
 
     def __contains__(self, item: object) -> bool:
         return item in self.sections()
+
+    def __str__(self) -> str:
+        return os.path.splitext(os.path.basename(self.config_file))[0].upper()
 
 
 if __name__ == '__main__':
