@@ -1,1 +1,1 @@
-%OLDHOME_FOLDER%create_venv_extra_envvars.py,%OLDHOME_FOLDER% %PROJECT_NAME%
+%OLDHOME_FOLDER%create_venv_extra_envvars.py,%WORKSPACE_FOLDER% %PROJECT_NAME%

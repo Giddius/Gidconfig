@@ -157,10 +157,10 @@ class SingleAccessConfigHandler(ConfigHandler):
     bool_true_values = {'yes', '1', 'true', '+', 'y', 'on', 'enabled', 'positive'}
     bool_false_values = {'no', '0', 'false', '-', 'n', 'off', 'disabled', 'negative'}
 
-    def __init__(self, config_file=None, auto_read=True, auto_save=True, allow_no_value=True, list_delimiter=',', comment_marker='#', top_comment: Union[str, list, tuple] = None, comment_prefixes='~', ** kwargs):
+    def __init__(self, config_file=None, auto_read=True, auto_save=True, allow_no_value=True, list_delimiter=',', comment_marker='#', top_comment: Union[str, Iterable] = None, comment_prefixes='~', ** kwargs):
         self.section_comments = {}
         self.comment_marker = comment_marker
-        self.top_comment = self._validate_top_comment(top_comment)
+        self._top_comment = self._validate_top_comment(top_comment)
         self.top_comment_regex = re.compile(r"^.*?(?=\n\[)", re.DOTALL)
         self.section_header_chars = {'top': '▲', 'bottom': '▼', 'middle': '▌'}
         super().__init__(config_file=config_file, auto_read=auto_read, auto_save=auto_save, allow_no_value=allow_no_value, comment_prefixes='~', ** kwargs)
@@ -186,6 +186,15 @@ class SingleAccessConfigHandler(ConfigHandler):
                             Tuple[int]: self._as_tuple_int,
                             Tuple[float]: self._as_tuple_float,
                             bool: self._as_bool}
+
+    @property
+    def top_comment(self):
+        return self._top_comment
+
+    @top_comment.setter
+    def top_comment(self, value: Union[Iterable, str]):
+        self._top_comment = self._validate_top_comment(value)
+        self.sa
 
     def _validate_top_comment(self, top_comment):
         if isinstance(top_comment, str):
@@ -285,10 +294,10 @@ class SingleAccessConfigHandler(ConfigHandler):
                 f.write(self.top_comment + '\n\n' + f'# {"-"*self.section_header_size}\n\n')
             f.write('\n'.join(_new_content))
 
-    def write(self, filename=None):
+    def save(self, filename=None):
         filename = self.config_file if filename is None else filename
         with open(filename, 'w') as f:
-            super().write(f)
+            self.write(f)
         self._reset_section_comments(filename)
 
     def read(self, filename=None):

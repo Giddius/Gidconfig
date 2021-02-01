@@ -618,3 +618,4 @@ create_venv_logs/
 tools/create_venv_logs/create_venv.errors
 tools/create_venv.cmd
 tools/pipx_available_scripts.md
+.venv
