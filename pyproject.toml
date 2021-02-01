@@ -14,7 +14,15 @@ requires = ["fuzzywuzzy==0.18.0", "gidlogger==0.1.7"]
 [tool.flit.scripts]
 
 [tool.flit.sdist]
-exclude = ["tests", "tools", "temp", ".pydeps", "TODO.md", ".editorconfig","pytest_coverage"]
+exclude = [
+    "tests",
+    "tools",
+    "temp",
+    ".pydeps",
+    "TODO.md",
+    ".editorconfig",
+    "pytest_coverage",
+]
 
 # endregion [flit]
 # region [autopep8]
