@@ -8,3 +8,5 @@ objectgraph
 pipreqs
 pydeps
 numpy==1.19.3
+docutils
+fabric

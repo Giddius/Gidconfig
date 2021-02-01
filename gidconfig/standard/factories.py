@@ -11,7 +11,6 @@ from gidconfig.utility.functions import pathmaker
 
 # endregion [Imports]
 
-__updated__ = '2020-11-14 18:08:30'
 
 # region [Logging]
 
