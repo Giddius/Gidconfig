@@ -1,3 +1,7 @@
+@ECHO OFF
+SETLOCAL ENABLEEXTENSIONS
+
+REM ----------------------------------------------------------------------------------------------------
 REM Necessary Files:
 REM - pre_setup_scripts.txt
 REM - required_personal_packages.txt
@@ -9,15 +13,13 @@ REM - required_dev.txt
 REM - post_setup_scripts.txt
 REM ----------------------------------------------------------------------------------------------------
 
-@ECHO OFF
-SETLOCAL ENABLEEXTENSIONS
 
+SET PROJECT_NAME=%~1
+SET PROJECT_AUTHOR=%~2
 
+SET TOOLS_FOLDER=%~dp0
+SET WORKSPACE_FOLDER=%TOOLS_FOLDER%\..
 
-
-SET PROJECT_NAME=gidconfig
-
-SET OLDHOME_FOLDER=%~dp0
 
 REM ---------------------------------------------------
 SET _date=%DATE:/=-%
@@ -39,8 +41,8 @@ SET TIMEBLOCK=%_years%-%_months%-%_days%_%_hours%-%_minutes%-%_seconds%
 ECHO ***************** Current time is *****************
 ECHO                     %TIMEBLOCK%
 
-ECHO ################# changing directory to %OLDHOME_FOLDER%
-CD %OLDHOME_FOLDER%
+ECHO ################# CHANGING DIRECTORY to -- %TOOLS_FOLDER% -- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+CD %TOOLS_FOLDER%
 ECHO.
 
 ECHO -------------------------------------------- PRE-SETUP SCRIPTS --------------------------------------------
@@ -51,38 +53,67 @@ ECHO -------------------------- Calling %%A with %%B --------------^>
 CALL %%A %%B
 ECHO.
 )
+Echo.
+ECHO -------------------------------------------- preparing venv_setup_settings --------------------------------------------
+ECHO.
+ECHO ################# preparing venv_setup_settings
+call  %TOOLS_FOLDER%prepare_venv_settings.py %TOOLS_FOLDER%
+if %ERRORLEVEL% == 1 (
+    ECHO.
+    ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ECHO 8888888888888888888888888888888888888888888888888
+    ECHO.
+    Echo Created Venv settings folder, please custimize the files and restart the Scripts
+    ECHO.
+    ECHO 8888888888888888888888888888888888888888888888888
+    ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ECHO.
+    Exit 63
+) else (
+    Echo finished preparing venv
+)
+
+
+rem ECHO.
+rem ECHO -------------------------------------------- Clearing Pip Cache --------------------------------------------
+rem RD /S /Q %LocalAppData%\pip\Cache
+rem ECHO.
 
 
 
 ECHO -------------------------------------------- BASIC VENV SETUP --------------------------------------------
 ECHO.
 
-ECHO ################# suspending Dropbox
-CALL pskill64 Dropbox
-ECHO.
 
 ECHO ################# Removing old venv folder
-RD /S /Q ..\.venv
+RD /S /Q %WORKSPACE_FOLDER%\.venv
 ECHO.
 
+
+ECHO ################# pycleaning workspace
+call pyclean %WORKSPACE_FOLDER%
+echo.
+
+
+
 ECHO ################# creating new venv folder
-mkdir ..\.venv
+mkdir %WORKSPACE_FOLDER%\.venv
 ECHO.
 
 ECHO ################# Calling venv module to initialize new venv
-python -m venv ..\.venv
-ECHO.
-
-ECHO ################# changing directory to ..\.venv
-CD ..\.venv
+python -m venv %WORKSPACE_FOLDER%\.venv
 ECHO.
 
 ECHO ################# activating venv for package installation
-CALL .\Scripts\activate.bat
+CALL %WORKSPACE_FOLDER%\.venv\Scripts\activate.bat
 ECHO.
 
 ECHO ################# upgrading pip to get rid of stupid warning
-CALL %OLDHOME_FOLDER%get-pip.py
+call curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+set _REPLACE_STRING=
+call fart -C %TOOLS_FOLDER%get-pip.py "import os.path" "import setuptools\nimport os.path"
+call get-pip.py --force-reinstall
+del /Q get-pip.py
 ECHO.
 
 ECHO.
@@ -92,26 +123,28 @@ ECHO ---------------------------------------------------------------------------
 ECHO.
 ECHO.
 
-cd %OLDHOME_FOLDER%
+
 
 ECHO +++++++++++++++++++++++++++++ Standard Packages +++++++++++++++++++++++++++++
 ECHO.
 ECHO.
 
 ECHO ################# Installing Setuptools
-CALL pip install --upgrade --pre setuptools
-ECHO.
-
-ECHO ################# Installing python-dotenv
-CALL pip install --upgrade --pre python-dotenv
+CALL pip install --no-cache-dir --upgrade setuptools
 ECHO.
 
 ECHO ################# Installing wheel
-CALL pip install --upgrade --pre wheel
+CALL pip install --no-cache-dir --upgrade wheel
 ECHO.
 
+ECHO ################# Installing python-dotenv
+CALL pip install --no-cache-dir --upgrade python-dotenv
+ECHO.
+
+
+
 ECHO ################# Installing flit
-CALL pip install --force-reinstall --no-cache-dir --upgrade --pre flit
+CALL pip install --no-cache-dir --upgrade flit
 ECHO.
 
 ECHO.
@@ -140,7 +173,20 @@ FOR /F "tokens=1 delims=," %%A in (.\venv_setup_settings\required_misc.txt) do (
 ECHO.
 ECHO -------------------------- Installing %%A --------------^>
 ECHO.
-CALL pip install --upgrade %%A
+CALL pip install --upgrade --no-cache-dir %%A
+ECHO.
+)
+
+ECHO.
+ECHO.
+
+Echo +++++++++++++++++++++++++++++ Experimental Packages +++++++++++++++++++++++++++++
+ECHO.
+FOR /F "tokens=1 delims=," %%A in (.\venv_setup_settings\required_experimental.txt) do (
+ECHO.
+ECHO -------------------------- Installing %%A --------------^>
+ECHO.
+CALL pip install --upgrade --no-cache-dir %%A
 ECHO.
 )
 
@@ -153,7 +199,7 @@ FOR /F "tokens=1 delims=," %%A in (.\venv_setup_settings\required_Qt.txt) do (
 ECHO.
 ECHO -------------------------- Installing %%A --------------^>
 ECHO.
-CALL pip install --upgrade %%A
+CALL pip install --upgrade --no-cache-dir %%A
 ECHO.
 )
 
@@ -166,7 +212,7 @@ FOR /F "tokens=1 delims=," %%A in (.\venv_setup_settings\required_from_github.tx
 ECHO.
 ECHO -------------------------- Installing %%A --------------^>
 ECHO.
-CALL call pip install --upgrade git+%%A
+CALL call pip install --upgrade --no-cache-dir git+%%A
 ECHO.
 )
 
@@ -179,7 +225,7 @@ FOR /F "tokens=1 delims=," %%A in (.\venv_setup_settings\required_test.txt) do (
 ECHO.
 ECHO -------------------------- Installing %%A --------------^>
 ECHO.
-CALL pip install --upgrade %%A
+CALL pip install --upgrade --no-cache-dir %%A
 ECHO.
 )
 
@@ -192,7 +238,7 @@ FOR /F "tokens=1 delims=," %%A in (.\venv_setup_settings\required_dev.txt) do (
 ECHO.
 ECHO -------------------------- Installing %%A --------------^>
 ECHO.
-CALL pip install --no-cache-dir --upgrade --pre %%A
+CALL pip install --upgrade --no-cache-dir %%A
 ECHO.
 )
 
@@ -201,15 +247,16 @@ ECHO.
 
 
 ECHO -------------------------------------------- INSTALL THE PROJECT ITSELF AS -DEV PACKAGE --------------------------------------------
-cd ..\
+echo.
+PUSHD %WORKSPACE_FOLDER%
 rem call pip install -e .
 call flit install -s
+echo.
+POPD
 ECHO.
 
 ECHO.
 ECHO.
-
-cd %OLDHOME_FOLDER%
 
 ECHO -------------------------------------------- POST-SETUP SCRIPTS --------------------------------------------
 ECHO.
@@ -228,7 +275,10 @@ ECHO ###########################################################################
 ECHO -------------------------------------------------------------------------------------------------------------
 ECHO #############################################################################################################
 ECHO.
+ECHO.
 ECHO ++++++++++++++++++++++++++++++++++++++++++++++++++ FINISHED +++++++++++++++++++++++++++++++++++++++++++++++++
+ECHO.
+echo ************************** ErrorLevel at end of create_venv script is %ERRORLEVEL% **************************
 ECHO.
 ECHO #############################################################################################################
 ECHO -------------------------------------------------------------------------------------------------------------
