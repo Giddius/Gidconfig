@@ -9,12 +9,12 @@ classifiers = ["License :: OSI Approved :: MIT License"]
 description-file = "readme.md"
 home-page = "https://github.com/Giddius/Gidconfig"
 module = "gidconfig"
-requires = ["fuzzywuzzy>=0.18.0", "gidlogger>=0.1.7"]
+requires = ["fuzzywuzzy==0.18.0", "gidlogger==0.1.7"]
 
 [tool.flit.scripts]
 
 [tool.flit.sdist]
-exclude = ["tests", "tools", "temp", ".pydeps", "TODO.md", ".editorconfig"]
+exclude = ["tests", "tools", "temp", ".pydeps", "TODO.md", ".editorconfig","pytest_coverage"]
 
 # endregion [flit]
 # region [autopep8]

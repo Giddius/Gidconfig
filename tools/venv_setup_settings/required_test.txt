@@ -1,1 +1,4 @@
 pytest
+pytest-click
+pytest-venv
+pytest-cov

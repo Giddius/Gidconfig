@@ -1,6 +1,8 @@
 from gidconfig.standard.classes import SingleAccessConfigHandler, List, Set, Tuple
 import pytest
 from pprint import pprint
+import configparser
+import os
 
 
 def test_basic_retrieve(basic_single_access_config: SingleAccessConfigHandler):
@@ -109,3 +111,31 @@ def test_append(basic_single_access_config: SingleAccessConfigHandler):
     cfg.append('one', 'multiword_comma_string', ['first_add', 'second_add', 'third_add'])
     assert cfg.retrieve('one', 'multiword_comma_string', typus=str) == "this is a test of a sentence with an, comma in it, first_add, second_add, third_add"
     assert cfg.retrieve('one', 'multiword_comma_string', typus=list) == ["this is a test of a sentence with an", "comma in it", "first_add", "second_add", "third_add"]
+
+    cfg.append('one', 'int_exp', 8)
+    assert cfg.retrieve('one', 'int_exp', typus=str) == "6, 8"
+    assert cfg.retrieve('one', 'int_exp', typus=List[int]) == [6, 8]
+
+
+def test_errors(basic_single_access_config: SingleAccessConfigHandler):
+    cfg = basic_single_access_config[0]
+
+    with pytest.raises(ValueError):
+        _ = cfg.retrieve('one', 'string_exp', typus=bool)
+
+    with pytest.raises(configparser.NoSectionError):
+        _ = cfg.retrieve('fakey', 'doesnt_matter_anymore')
+
+    with pytest.raises(configparser.NoOptionError):
+        _ = cfg.retrieve('one', 'now_this_is_fake')
+
+    with pytest.raises(configparser.NoSectionError):
+        cfg.append('fakey', 'doesnt_matter_anymore', 'something')
+
+    with pytest.raises(configparser.NoOptionError):
+        cfg.append('one', 'doesnt_matter_anymore', 'something')
+
+
+def test_str(basic_single_access_config: SingleAccessConfigHandler):
+    cfg = basic_single_access_config[0]
+    assert str(cfg) == "SAMPLE_CONFIG"
