@@ -115,7 +115,7 @@ class ConfigHandler(configparser.ConfigParser):
             self.save()
 
     def set(self, section, option, value):
-        if isinstance(value, list):
+        if isinstance(value, (list, set, tuple)):
             value = ', '.join(list(map(str, value)))
         if not isinstance(value, str):
             value = str(value)
@@ -305,6 +305,20 @@ class SingleAccessConfigHandler(ConfigHandler):
                 f.write(self._make_section_header('instructions') + '\n')
                 f.write(self.top_comment + '\n\n' + f'# {"-"*self.section_header_size}\n\n')
             f.write('\n'.join(_new_content))
+
+    def append(self, section, option, value):
+        if not self.has_section(section):
+            raise configparser.NoSectionError(section)
+        if not self.has_option(section, option):
+            raise configparser.NoOptionError(option, section)
+        if isinstance(value, (list, set, tuple)):
+            value = ', '.join(value)
+        if not isinstance(value, str):
+            value = str(value)
+
+        data = self.retrieve(section, option, typus=str)
+        data += ', ' + value
+        self.set(section, option, data)
 
     def save(self, filename=None):
         filename = self.config_file if filename is None else filename

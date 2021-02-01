@@ -88,7 +88,7 @@ def comment_sample_ini_file(tmpdir):
 @pytest.fixture
 def ini_config(sample_ini_file):
     _out_cfg = ConfigHandler(sample_ini_file)
-    yield _out_cfg
+    yield _out_cfg, sample_ini_file
 
 
 @pytest.fixture

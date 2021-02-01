@@ -99,3 +99,13 @@ def test_commented_ini(comment_single_access_config: SingleAccessConfigHandler):
     content_lines = content.splitlines()
 
     assert content_lines[6] == "# this is a comment for section 'one'"
+
+
+def test_append(basic_single_access_config: SingleAccessConfigHandler):
+    cfg = basic_single_access_config[0]
+    cfg.append('one', 'string_exp', 'appended_value')
+    assert cfg.retrieve('one', 'string_exp', typus=str) == "testerstr, appended_value"
+
+    cfg.append('one', 'multiword_comma_string', ['first_add', 'second_add', 'third_add'])
+    assert cfg.retrieve('one', 'multiword_comma_string', typus=str) == "this is a test of a sentence with an, comma in it, first_add, second_add, third_add"
+    assert cfg.retrieve('one', 'multiword_comma_string', typus=list) == ["this is a test of a sentence with an", "comma in it", "first_add", "second_add", "third_add"]
