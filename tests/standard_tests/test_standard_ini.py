@@ -25,5 +25,6 @@ def test_set(ini_config):
     with open(ini_config[1], 'r') as f:
         content = f.read()
     content_lines = content.splitlines()
-    assert content_lines[14] == 'new_option = value_is_string'
-    assert content_lines[15] == "new_list_option = alpha, bravo, charly"
+
+    assert 'new_option = value_is_string' in content_lines
+    assert "new_list_option = alpha, bravo, charly" in content_lines

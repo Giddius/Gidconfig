@@ -3,7 +3,11 @@ from gidconfig.standard.classes import ConfigHandler, Get, SingleAccessConfigHan
 
 import os
 
-SAMPLE_INI_CONTENT = """ [one]
+SAMPLE_INI_CONTENT = """[DEFAULT]
+default_string = this is a default test
+is_empty_value = not in default
+
+[one]
 string_exp = testerstr
 int_exp = 6
 # one small comment
@@ -22,8 +26,16 @@ multiword_string_list = this is a, test of a sentence, that is split inside a li
 [three]
 list_bad_format = first,second, third,     fourth
 
+[four]
+empty_not_backed_by_default =
+is_empty_value =
+
 """
-SAMPLE_COMMENTED_INI_CONTENT = """# This is a comment before any section
+SAMPLE_COMMENTED_INI_CONTENT = """
+# top_comment, that should be removed
+
+[DEFAULT]
+default_string = this is a default test
 
 # this is a comment for section 'one'
 [one]
@@ -87,17 +99,17 @@ def comment_sample_ini_file(tmpdir):
 
 @pytest.fixture
 def ini_config(sample_ini_file):
-    _out_cfg = ConfigHandler(sample_ini_file)
+    _out_cfg = ConfigHandler.from_defaults(sample_ini_file)
     yield _out_cfg, sample_ini_file
 
 
 @pytest.fixture
 def basic_single_access_config(sample_ini_file):
-    _out_cfg = SingleAccessConfigHandler(sample_ini_file)
+    _out_cfg = SingleAccessConfigHandler.from_defaults(sample_ini_file)
     yield _out_cfg, sample_ini_file
 
 
 @pytest.fixture
 def comment_single_access_config(comment_sample_ini_file):
-    _out_cfg = SingleAccessConfigHandler(comment_sample_ini_file)
+    _out_cfg = SingleAccessConfigHandler.from_defaults(comment_sample_ini_file)
     yield _out_cfg, comment_sample_ini_file

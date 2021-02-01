@@ -29,6 +29,24 @@ log.info(glog.imported(__name__))
 
 
 class ConfigHandler(configparser.ConfigParser):
+    allowed_default_settings = ['defaults',
+                                'dict_type',
+                                'allow_no_value',
+                                'delimiters',
+                                'comment_prefixes',
+                                'inline_comment_prefixes',
+                                'strict',
+                                'empty_lines_in_values',
+                                'default_section',
+                                'interpolation',
+                                'converters',
+                                'auto_read',
+                                'auto_save']
+
+    default_settings = {"auto_read": True,
+                        "auto_save": True,
+                        "allow_no_value": True}
+
     def __init__(self, config_file=None, auto_read=True, auto_save=True, allow_no_value=True, **kwargs):
         super().__init__(**kwargs, allow_no_value=allow_no_value)
         self.config_file = '' if config_file is None else config_file
@@ -38,6 +56,12 @@ class ConfigHandler(configparser.ConfigParser):
         self.annotation_replacements = {'[DEFAULT]': 'Options in this section are used if those options are not set in a Section'}
         if self.auto_read is True:
             self.read(self.config_file)
+
+    @classmethod
+    def set_default_setting(cls, key, value):
+        if key not in cls.allowed_default_settings:
+            raise KeyError(f'"{key}" is not an allowed default setting')
+        cls.default_settings[key] = value
 
     def getlist(self, section, option, delimiter=',', as_set=False, casefold_items=False, fallback_option: str = None):
         _raw = self.get(section, option, fallback=self.get(section, fallback_option) if fallback_option is not None else fallback_option).strip()
@@ -146,6 +170,14 @@ class ConfigHandler(configparser.ConfigParser):
             content = content.replace(target, replacement)
         return content
 
+    def options(self, section: str) -> List[str]:
+
+        return [option for option in super().options(section) if option not in self.defaults()]
+
+    @classmethod
+    def from_defaults(cls, config_file):
+        return cls(config_file, **cls.default_settings)
+
     def __contains__(self, item: object):
         return item in self.sections()
 
@@ -154,19 +186,41 @@ class ConfigHandler(configparser.ConfigParser):
 
 
 class SingleAccessConfigHandler(ConfigHandler):
+    allowed_default_settings = ['defaults',
+                                'dict_type',
+                                'delimiters',
+                                'inline_comment_prefixes',
+                                'strict',
+                                'empty_lines_in_values',
+                                'default_section',
+                                'interpolation',
+                                'converters',
+                                'auto_read',
+                                'auto_save',
+                                'list_delimiter',
+                                'comment_marker',
+                                'top_comment']
+
+    default_settings = {"auto_read": True,
+                        "auto_save": True,
+                        "allow_no_value": True,
+                        "list_delimiter": ',',
+                        "comment_marker": '#',
+                        "comment_prefixes": '~'}
+
     bool_true_values = {'yes', '1', 'true', '+', 'y', 'on', 'enabled', 'positive'}
     bool_false_values = {'no', '0', 'false', '-', 'n', 'off', 'disabled', 'negative'}
 
     def __init__(self, config_file=None, auto_read=True, auto_save=True, allow_no_value=True, list_delimiter=',', comment_marker='#', top_comment: Union[str, Iterable] = None, comment_prefixes='~', ** kwargs):
         self.section_comments = {}
-        self.comment_marker = comment_marker
-        self._top_comment = self._validate_top_comment(top_comment) if top_comment is not None else top_comment
-        self.top_comment_regex = re.compile(r"^.*?(?=\n?\[)", re.DOTALL)
+        self.section_header_size = 150
         self.section_header_chars = {'top': '▲', 'bottom': '▼', 'middle': '▌'}
-        super().__init__(config_file=config_file, auto_read=auto_read, auto_save=auto_save, allow_no_value=allow_no_value, comment_prefixes='~', ** kwargs)
+        self.comment_marker = comment_marker
+        self.top_comment_regex = re.compile(r"^[^\[\]]*?(?=\[)", re.DOTALL)
+        self._top_comment = self._validate_top_comment(top_comment) if top_comment is not None else top_comment
+        super().__init__(config_file=config_file, auto_read=auto_read, auto_save=auto_save, allow_no_value=allow_no_value, comment_prefixes=comment_prefixes, ** kwargs)
         self.list_delimiter = list_delimiter
 
-        self.section_header_size = 150
         self.typus_table = {str: str,
                             int: int,
                             float: float,
@@ -210,12 +264,15 @@ class SingleAccessConfigHandler(ConfigHandler):
 
     def retrieve(self, section, option, typus=str, *, fallback_section: str = None, fallback_option: str = None, direct_fallback=None, mod_func: Callable = None):
         raw_data = self.get(section=section, option=option, fallback=None)
+        raw_data = raw_data if raw_data not in ['', None] else self.defaults().get(option, None)
+
         if raw_data in [None, '']:
             if direct_fallback is not None:
                 return direct_fallback
             if fallback_option is not None:
                 fallback_section = section if fallback_section is None else fallback_section
-                raw_data = self.get(fallback_section, fallback_option)
+                raw_data = self.get(fallback_section, fallback_option, fallback=None)
+                raw_data = raw_data if raw_data not in ['', None] else self.defaults().get(fallback_option)
             else:
                 if self.has_section(section) is False:
                     raise configparser.NoSectionError(section)
@@ -350,8 +407,15 @@ class SingleAccessConfigHandler(ConfigHandler):
 
             if line is not None:
                 _cleaned_content.append(line)
-        content = self.top_comment_regex.sub('', '\n'.join(reversed(_cleaned_content)))
-        super().read_string(content)
+        if _current_section is not None:
+            self.section_comments[_current_section] = list(reversed(_buffered_comment_lines))
+
+        new_content = '\n'.join(reversed(_cleaned_content))
+        if self.top_comment is None:
+            match = self.top_comment_regex.match(new_content)
+            if match:
+                self.top_comment = match.group().replace(self._make_section_header('instructions') + '\n', '')
+        super().read_string(self.top_comment_regex.sub('', new_content))
 
     def options(self, section: str) -> List[str]:
         options = super().options(section)

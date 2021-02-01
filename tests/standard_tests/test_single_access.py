@@ -1,4 +1,5 @@
 from gidconfig.standard.classes import SingleAccessConfigHandler, List, Set, Tuple
+from gidconfig.utility.functions import readit
 import pytest
 from pprint import pprint
 import configparser
@@ -7,7 +8,7 @@ import os
 
 def test_basic_retrieve(basic_single_access_config: SingleAccessConfigHandler):
     cfg = basic_single_access_config[0]
-    assert set(cfg.sections()) == {'one', 'two', 'three'}
+    assert set(cfg.sections()) == {'one', 'two', 'three', 'four'}
     assert set(cfg.options('one')) == {'multiword_comma_string', 'multiword_string', 'bool_exp', 'int_exp', 'string_exp', 'float_exp'}
     assert set(cfg.options('two')) == {"list_str_exp", "list_int_exp", "list_bool_exp", "list_mixed_exp", "multiword_string_list"}
     assert set(cfg.options('three')) == {'list_bad_format'}
@@ -65,25 +66,8 @@ def test_basic_fallbacks(basic_single_access_config: SingleAccessConfigHandler):
     assert cfg.retrieve('one', 'does_not_exist', typus=list, fallback_section='two', fallback_option='list_str_exp') == ["first", "second", "third"]
     assert cfg.retrieve('one', 'does_not_exist', typus=list, fallback_section='two', fallback_option='list_str_exp', mod_func=lambda x: x.upper()) == ["FIRST", "SECOND", "THIRD"]
 
-
-def test_top_comment_and_headers(basic_single_access_config: SingleAccessConfigHandler):
-    cfg = basic_single_access_config[0]
-    cfg.top_comment = 'this is the top_comment\nwith a second line'
-    cfg.save()
-    with open(basic_single_access_config[1], 'r') as f:
-        content = f.read()
-
-    content_lines = content.splitlines()
-    assert content_lines[7] == '# this is the top_comment'
-    assert content_lines[3] == "# ▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌ INSTRUCTIONS ▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌"
-    cfg.save()
-    cfg.read()
-    with open(basic_single_access_config[1], 'r') as f:
-        content = f.read()
-
-    content_lines = content.splitlines()
-    assert content_lines[7] == '# this is the top_comment'
-    assert content_lines[3] == "# ▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌ INSTRUCTIONS ▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌"
+    assert cfg.retrieve('four', "is_empty_value") == "not in default"
+    assert cfg.retrieve('four', "empty_not_backed_by_default", fallback_option="is_empty_value") == "not in default"
 
 
 def test_commented_ini(comment_single_access_config: SingleAccessConfigHandler):
@@ -92,7 +76,7 @@ def test_commented_ini(comment_single_access_config: SingleAccessConfigHandler):
     assert set(cfg.options('one')) == {'multiword_comma_string', 'multiword_string', 'bool_exp', 'int_exp', 'string_exp', 'float_exp'}
     assert set(cfg.options('two')) == {"list_str_exp", "list_int_exp", "list_bool_exp", "list_mixed_exp", "multiword_string_list"}
     assert set(cfg.options('three')) == {'list_bad_format'}
-    assert cfg.section_comments == {'one': ["# this is a comment for section 'one'"], 'two': ["# this is a comment for section 'two'"], 'three': ["# this is a comment for section 'three'", "# with another comment underneath"]}
+    assert cfg.section_comments == {'DEFAULT': [], 'one': ["# this is a comment for section 'one'"], 'two': ["# this is a comment for section 'two'"], 'three': ["# this is a comment for section 'three'", "# with another comment underneath"]}
     cfg.save()
     cfg.read()
     with open(comment_single_access_config[1], 'r') as f:
@@ -100,7 +84,7 @@ def test_commented_ini(comment_single_access_config: SingleAccessConfigHandler):
 
     content_lines = content.splitlines()
 
-    assert content_lines[6] == "# this is a comment for section 'one'"
+    assert "# this is a comment for section 'one'\n[one]" in content
 
 
 def test_append(basic_single_access_config: SingleAccessConfigHandler):
