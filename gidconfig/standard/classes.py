@@ -160,8 +160,8 @@ class SingleAccessConfigHandler(ConfigHandler):
     def __init__(self, config_file=None, auto_read=True, auto_save=True, allow_no_value=True, list_delimiter=',', comment_marker='#', top_comment: Union[str, Iterable] = None, comment_prefixes='~', ** kwargs):
         self.section_comments = {}
         self.comment_marker = comment_marker
-        self._top_comment = self._validate_top_comment(top_comment)
-        self.top_comment_regex = re.compile(r"^.*?(?=\n\[)", re.DOTALL)
+        self._top_comment = self._validate_top_comment(top_comment) if top_comment is not None else top_comment
+        self.top_comment_regex = re.compile(r"^.*?(?=\n?\[)", re.DOTALL)
         self.section_header_chars = {'top': '▲', 'bottom': '▼', 'middle': '▌'}
         super().__init__(config_file=config_file, auto_read=auto_read, auto_save=auto_save, allow_no_value=allow_no_value, comment_prefixes='~', ** kwargs)
         self.list_delimiter = list_delimiter
@@ -175,16 +175,19 @@ class SingleAccessConfigHandler(ConfigHandler):
                             List[str]: self._as_list,
                             List[int]: self._as_list_int,
                             List[float]: self._as_list_float,
+                            List[bool]: self._as_list_bool,
                             set: self._as_set,
                             Set: self._as_set,
                             Set[str]: self._as_set,
                             Set[int]: self._as_set_int,
                             Set[float]: self._as_set_float,
+                            Set[bool]: self._as_set_bool,
                             tuple: self._as_tuple,
                             Tuple: self._as_tuple,
                             Tuple[str]: self._as_tuple,
                             Tuple[int]: self._as_tuple_int,
                             Tuple[float]: self._as_tuple_float,
+                            Tuple[bool]: self._as_tuple_bool,
                             bool: self._as_bool}
 
     @property
@@ -194,7 +197,6 @@ class SingleAccessConfigHandler(ConfigHandler):
     @top_comment.setter
     def top_comment(self, value: Union[Iterable, str]):
         self._top_comment = self._validate_top_comment(value)
-        self.sa
 
     def _validate_top_comment(self, top_comment):
         if isinstance(top_comment, str):
@@ -241,6 +243,10 @@ class SingleAccessConfigHandler(ConfigHandler):
         list_data = self._as_list(raw_data)
         return list(map(float, list_data))
 
+    def _as_list_bool(self, raw_data):
+        list_data = self._as_list(raw_data)
+        return list(map(self._as_bool, list_data))
+
     def _as_set(self, raw_data):
         return set(self._as_list(raw_data))
 
@@ -250,6 +256,9 @@ class SingleAccessConfigHandler(ConfigHandler):
     def _as_set_float(self, raw_data):
         return set(self._as_list_float(raw_data))
 
+    def _as_set_bool(self, raw_data):
+        return set(self._as_list_bool(raw_data))
+
     def _as_tuple(self, raw_data):
         return tuple(self._as_list(raw_data))
 
@@ -258,6 +267,9 @@ class SingleAccessConfigHandler(ConfigHandler):
 
     def _as_tuple_float(self, raw_data):
         return tuple(self._as_list_float(raw_data))
+
+    def _as_tuple_bool(self, raw_data):
+        return tuple(self._as_list_bool(raw_data))
 
     def _as_bool(self, raw_data):
         raw_data = raw_data.casefold()
@@ -301,7 +313,7 @@ class SingleAccessConfigHandler(ConfigHandler):
         self._reset_section_comments(filename)
 
     def read(self, filename=None):
-        _configfile = [self.config_file] if filename is None else filename
+        _configfile = self.config_file if filename is None else filename
         _cleaned_content = []
         _buffered_comment_lines = []
         _current_section = None
@@ -318,7 +330,7 @@ class SingleAccessConfigHandler(ConfigHandler):
                 _buffered_comment_lines.append(line)
                 line = None
             elif _current_section is not None and not line.startswith(self.comment_marker):
-                self.section_comments[_current_section] = _buffered_comment_lines
+                self.section_comments[_current_section] = list(reversed(_buffered_comment_lines))
                 _current_section = None
                 _buffered_comment_lines = []
 
@@ -326,6 +338,10 @@ class SingleAccessConfigHandler(ConfigHandler):
                 _cleaned_content.append(line)
         content = self.top_comment_regex.sub('', '\n'.join(reversed(_cleaned_content)))
         super().read_string(content)
+
+    def options(self, section: str) -> List[str]:
+        options = super().options(section)
+        return [option for option in options if self.comment_marker not in option]
 
 
 if __name__ == '__main__':
