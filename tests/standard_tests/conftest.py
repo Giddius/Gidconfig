@@ -25,6 +25,7 @@ multiword_string_list = this is a, test of a sentence, that is split inside a li
 
 [three]
 list_bad_format = first,second, third,     fourth
+special_bool = True
 
 [four]
 empty_not_backed_by_default =

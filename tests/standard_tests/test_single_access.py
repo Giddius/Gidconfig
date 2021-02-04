@@ -11,7 +11,7 @@ def test_basic_retrieve(basic_single_access_config: SingleAccessConfigHandler):
     assert set(cfg.sections()) == {'one', 'two', 'three', 'four'}
     assert set(cfg.options('one')) == {'multiword_comma_string', 'multiword_string', 'bool_exp', 'int_exp', 'string_exp', 'float_exp'}
     assert set(cfg.options('two')) == {"list_str_exp", "list_int_exp", "list_bool_exp", "list_mixed_exp", "multiword_string_list"}
-    assert set(cfg.options('three')) == {'list_bad_format'}
+    assert set(cfg.options('three')) == {'list_bad_format', 'special_bool'}
 
     assert cfg.retrieve('one', 'string_exp', typus=str) == 'testerstr'
     assert cfg.retrieve('one', 'int_exp', typus=int) == 6
@@ -43,6 +43,8 @@ def test_basic_retrieve(basic_single_access_config: SingleAccessConfigHandler):
 
     assert cfg.retrieve('three', 'list_bad_format', typus=str) == 'first,second, third,     fourth'
     assert cfg.retrieve('three', 'list_bad_format', typus=List) == ["first", "second", "third", "fourth"]
+    assert cfg.retrieve('three', 'special_bool', typus=bool) == True
+    assert cfg.retrieve('three', 'special_bool', typus=bool, direct_fallback=False) == True
 
 
 def test_basic_modification(basic_single_access_config: SingleAccessConfigHandler):

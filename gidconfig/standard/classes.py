@@ -199,20 +199,23 @@ class SingleAccessConfigHandler(ConfigHandler):
                                 'auto_save',
                                 'list_delimiter',
                                 'comment_marker',
-                                'top_comment']
+                                'top_comment',
+                                'read_before_retrieve']
 
     default_settings = {"auto_read": True,
                         "auto_save": True,
                         "allow_no_value": True,
                         "list_delimiter": ',',
                         "comment_marker": '#',
-                        "comment_prefixes": '~'}
+                        "comment_prefixes": '~',
+                        "read_before_retrieve": False}
 
     bool_true_values = {'yes', '1', 'true', '+', 'y', 'on', 'enabled', 'positive'}
     bool_false_values = {'no', '0', 'false', '-', 'n', 'off', 'disabled', 'negative'}
 
-    def __init__(self, config_file=None, auto_read=True, auto_save=True, allow_no_value=True, list_delimiter=',', comment_marker='#', top_comment: Union[str, Iterable] = None, comment_prefixes='~', ** kwargs):
+    def __init__(self, config_file=None, auto_read=True, auto_save=True, allow_no_value=True, list_delimiter=',', read_before_retrieve=False, comment_marker='#', top_comment: Union[str, Iterable] = None, comment_prefixes='~', ** kwargs):
         self.section_comments = {}
+        self.read_before_retrieve = read_before_retrieve
         self.section_header_size = 150
         self.section_header_chars = {'top': '▲', 'bottom': '▼', 'middle': '▌'}
         self.comment_marker = comment_marker
@@ -263,6 +266,9 @@ class SingleAccessConfigHandler(ConfigHandler):
         return '\n'.join(_out)
 
     def retrieve(self, section, option, typus=str, *, fallback_section: str = None, fallback_option: str = None, direct_fallback=None, mod_func: Callable = None):
+        if self.read_before_retrieve is True:
+
+            self.read()
         raw_data = self.get(section=section, option=option, fallback=None)
         raw_data = raw_data if raw_data not in ['', None] else self.defaults().get(option, None)
 
@@ -414,7 +420,8 @@ class SingleAccessConfigHandler(ConfigHandler):
         if self.top_comment is None:
             match = self.top_comment_regex.match(new_content)
             if match:
-                self.top_comment = match.group().replace(self._make_section_header('instructions') + '\n', '')
+                self.top_comment = match.group().replace(self._make_section_header('instructions') + '\n', '').replace(f'# {"-"*self.section_header_size}\n\n', '').strip('\n')
+        self.clear()
         super().read_string(self.top_comment_regex.sub('', new_content))
 
     def options(self, section: str) -> List[str]:

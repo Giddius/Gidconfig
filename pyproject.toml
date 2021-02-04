@@ -9,7 +9,7 @@ classifiers = ["License :: OSI Approved :: MIT License"]
 description-file = "readme.md"
 home-page = "https://github.com/Giddius/Gidconfig"
 module = "gidconfig"
-requires = ["fuzzywuzzy==0.18.0", "gidlogger==0.1.7"]
+requires = ["fuzzywuzzy==0.18.0", "gidlogger>=0.1.8"]
 
 [tool.flit.scripts]
 
