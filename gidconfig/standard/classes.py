@@ -284,6 +284,7 @@ class SingleAccessConfigHandler(ConfigHandler):
                     raise configparser.NoSectionError(section)
                 elif self.has_option(section, option) is False:
                     raise configparser.NoOptionError(option, section)
+
         data = self.typus_table.get(typus)(raw_data)
         if mod_func is not None:
             if type(data) in [list, tuple, set]:
