@@ -18,8 +18,6 @@ log.info(glog.imported(__name__))
 
 # endregion [Logging]
 
-# region [Enums]
-
 
 class Cfg(Flag):
     User = auto()
@@ -36,7 +34,9 @@ class Get(Enum):
     path = auto()
     datetime = auto()
 
-# endregion [Enums]
+
+class Fallback(Enum):
+    NULL = auto()
 
 
 # region [Main_Exec]

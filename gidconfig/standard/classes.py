@@ -15,7 +15,7 @@ from fuzzywuzzy import fuzz
 import gidlogger as glog
 
 # * Local Imports -->
-from gidconfig.data.enums import Get
+from gidconfig.data.enums import Get, Fallback
 from gidconfig.utility.functions import readit
 # endregion [Imports]
 
@@ -186,6 +186,7 @@ class ConfigHandler(configparser.ConfigParser):
 
 
 class SingleAccessConfigHandler(ConfigHandler):
+
     allowed_default_settings = ['defaults',
                                 'dict_type',
                                 'delimiters',
@@ -265,7 +266,7 @@ class SingleAccessConfigHandler(ConfigHandler):
             _out.append(line)
         return '\n'.join(_out)
 
-    def retrieve(self, section, option, typus=str, *, fallback_section: str = None, fallback_option: str = None, direct_fallback=None, mod_func: Callable = None):
+    def retrieve(self, section, option, typus=str, *, fallback_section: str = None, fallback_option: str = None, direct_fallback=Fallback.NULL, mod_func: Callable = None):
         if self.read_before_retrieve is True:
 
             self.read()
@@ -273,7 +274,7 @@ class SingleAccessConfigHandler(ConfigHandler):
         raw_data = raw_data if raw_data not in ['', None] else self.defaults().get(option, None)
 
         if raw_data in [None, '']:
-            if direct_fallback is not None:
+            if direct_fallback is not Fallback.NULL:
                 return direct_fallback
             if fallback_option is not None:
                 fallback_section = section if fallback_section is None else fallback_section
@@ -453,7 +454,7 @@ class SingleAccessConfigHandler(ConfigHandler):
         for section in self.sections():
             _out[section] = {}
             for option in self.options(section):
-                value = self.retrieve(section, option)
+                value = self.retrieve(section, option, direct_fallback=None)
                 _out[section][option] = self._auto_convert_value(value)
         return _out
 
