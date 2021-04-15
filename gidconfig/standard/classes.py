@@ -454,7 +454,7 @@ class SingleAccessConfigHandler(ConfigHandler):
             _out[section] = {}
             for option in self.options(section):
                 value = self.retrieve(section, option)
-                _out[section] = self._auto_convert_value(value)
+                _out[section][option] = self._auto_convert_value(value)
         return _out
 
 
