@@ -470,7 +470,7 @@ class SingleAccessConfigHandler(ConfigHandler):
         return _out
 
     async def async_to_dict(self):
-        return asyncio.to_thread(self.to_dict)
+        return await asyncio.to_thread(self.to_dict)
 
 
 if __name__ == '__main__':
