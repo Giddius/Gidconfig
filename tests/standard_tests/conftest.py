@@ -36,6 +36,7 @@ SAMPLE_COMMENTED_INI_CONTENT = """
 # top_comment, that should be removed
 
 [DEFAULT]
+# This is a default comment
 default_string = this is a default test
 
 # this is a comment for section 'one'

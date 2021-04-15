@@ -8,6 +8,7 @@ from typing import Union, Callable, List, Set, Tuple, Iterable
 from datetime import datetime, timedelta
 from pprint import pprint
 import re
+import asyncio
 # * Third Party Imports -->
 from fuzzywuzzy import fuzz
 
@@ -391,6 +392,9 @@ class SingleAccessConfigHandler(ConfigHandler):
             self.write(f)
         self._reset_section_comments(filename)
 
+    async def async_save(self, filename=None):
+        await asyncio.to_thread(self.save, filename=filename)
+
     def read(self, filename=None):
         _configfile = self.config_file if filename is None else filename
         _cleaned_content = []
@@ -453,17 +457,20 @@ class SingleAccessConfigHandler(ConfigHandler):
             return False
         return value
 
-    @property
-    def as_dict(self):
+    def to_dict(self):
         _out = {'default': {}}
         for default_option, default_value in self.defaults().items():
-            _out['default'][default_option] = self._auto_convert_value(default_value)
+            if self.comment_marker not in default_option:
+                _out['default'][default_option] = self._auto_convert_value(default_value)
         for section in self.sections():
             _out[section] = {}
             for option in self.options(section):
                 value = self.retrieve(section, option, direct_fallback=None)
                 _out[section][option] = self._auto_convert_value(value)
         return _out
+
+    async def async_to_dict(self):
+        return asyncio.to_thread(self.to_dict)
 
 
 if __name__ == '__main__':
