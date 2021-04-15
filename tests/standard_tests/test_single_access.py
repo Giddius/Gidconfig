@@ -125,3 +125,18 @@ def test_errors(basic_single_access_config: SingleAccessConfigHandler):
 def test_str(basic_single_access_config: SingleAccessConfigHandler):
     cfg = basic_single_access_config[0]
     assert str(cfg) == "SAMPLE_CONFIG"
+
+
+def test_as_dict(basic_single_access_config: SingleAccessConfigHandler):
+    cfg = basic_single_access_config[0]
+    cfg_dict = cfg.as_dict
+    assert cfg_dict.get('four', {}).get('empty_not_backed_by_default') in {None}
+    assert cfg_dict.get('one', {}).get('float_exp') == 6.31
+    assert set(cfg_dict.get('two', {}).get('list_mixed_exp')) == {'big', 12, 'small', False, True, 69}
+
+
+def test_as_dict_commented(comment_single_access_config: SingleAccessConfigHandler):
+    cfg = comment_single_access_config[0]
+    cfg_dict = cfg.as_dict
+    assert cfg_dict.get('one', {}).get('float_exp') == 6.31
+    assert set(cfg_dict.get('two', {}).get('list_mixed_exp')) == {'big', 12, 'small', False, True, 69}

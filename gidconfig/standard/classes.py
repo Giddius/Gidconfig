@@ -438,19 +438,26 @@ class SingleAccessConfigHandler(ConfigHandler):
         return _out
 
     def _auto_convert_value(self, value: str):
+        if value is None:
+            return None
         value = value.casefold()
         if self.list_delimiter in value:
             return self._list_auto_convert_value(value)
         if value.isdigit() is True:
             return int(value)
+        if '.' in value and value.replace('.', '', 1).isdigit():
+            return float(value)
         if value in self.bool_true_values:
             return True
         if value in self.bool_false_values:
             return False
         return value
 
-    def to_dict(self):
-        _out = {}
+    @property
+    def as_dict(self):
+        _out = {'default': {}}
+        for default_option, default_value in self.defaults().items():
+            _out['default'][default_option] = self._auto_convert_value(default_value)
         for section in self.sections():
             _out[section] = {}
             for option in self.options(section):
