@@ -210,8 +210,8 @@ class SingleAccessConfigHandler(ConfigHandler):
                         "comment_prefixes": '~',
                         "read_before_retrieve": False}
 
-    bool_true_values = {'yes', '1', 'true', '+', 'y', 'on', 'enabled', 'positive'}
-    bool_false_values = {'no', '0', 'false', '-', 'n', 'off', 'disabled', 'negative'}
+    bool_true_values = {'yes', 'true', '+', 'y', 'on', 'enabled', 'positive'}
+    bool_false_values = {'no', 'false', '-', 'n', 'off', 'disabled', 'negative'}
 
     def __init__(self, config_file=None, auto_read=True, auto_save=True, allow_no_value=True, list_delimiter=',', read_before_retrieve=False, comment_marker='#', top_comment: Union[str, Iterable] = None, comment_prefixes='~', ** kwargs):
         self.section_comments = {}
@@ -428,6 +428,34 @@ class SingleAccessConfigHandler(ConfigHandler):
     def options(self, section: str) -> List[str]:
         options = super().options(section)
         return [option for option in options if self.comment_marker not in option]
+
+    def _list_auto_convert_value(self, value: str):
+        _out = []
+        for item in value.split(self.list_delimiter):
+            item = item.strip()
+            _out.append(self._auto_convert_value(item))
+        return _out
+
+    def _auto_convert_value(self, value: str):
+        value = value.casefold()
+        if self.list_delimiter in value:
+            return self._list_auto_convert_value(value)
+        if value.isdigit() is True:
+            return int(value)
+        if value in self.bool_true_values:
+            return True
+        if value in self.bool_false_values:
+            return False
+        return value
+
+    def to_dict(self):
+        _out = {}
+        for section in self.sections():
+            _out[section] = {}
+            for option in self.options(section):
+                value = self.retrieve(section, option)
+                _out[section] = self._auto_convert_value(value)
+        return _out
 
 
 if __name__ == '__main__':
