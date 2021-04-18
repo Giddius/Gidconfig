@@ -4,11 +4,12 @@
 # * Standard Library Imports -->
 import os
 import configparser
-from typing import Union, Callable, List, Set, Tuple, Iterable
+from typing import Union, Callable, List, Set, Tuple, Iterable, Any
 from datetime import datetime, timedelta
 from pprint import pprint
 import re
 import asyncio
+from hashlib import md5, sha256, sha512, blake2b, blake2s
 # * Third Party Imports -->
 from fuzzywuzzy import fuzz
 
@@ -225,8 +226,10 @@ class SingleAccessConfigHandler(ConfigHandler):
         self._top_comment = self._validate_top_comment(top_comment) if top_comment is not None else top_comment
         super().__init__(config_file=config_file, auto_read=auto_read, auto_save=auto_save, allow_no_value=allow_no_value, comment_prefixes=comment_prefixes, ** kwargs)
         self.list_delimiter = list_delimiter
+        self.file_hash_when_loaded = ""
 
-        self.typus_table = {str: str,
+        self.typus_table = {Any: self._auto_convert_value,
+                            str: str,
                             int: int,
                             float: float,
                             list: self._as_list,
@@ -249,6 +252,11 @@ class SingleAccessConfigHandler(ConfigHandler):
                             Tuple[bool]: self._as_tuple_bool,
                             bool: self._as_bool}
 
+    def get_config_file_hash(self, in_file=None):
+        _file = self.config_file if in_file is None else in_file
+        with open(_file, 'rb') as f:
+            return md5(f.read()).hexdigest()
+
     @property
     def top_comment(self):
         return self._top_comment
@@ -267,10 +275,10 @@ class SingleAccessConfigHandler(ConfigHandler):
             _out.append(line)
         return '\n'.join(_out)
 
-    def retrieve(self, section, option, typus=str, *, fallback_section: str = None, fallback_option: str = None, direct_fallback=Fallback.NULL, mod_func: Callable = None):
-        if self.read_before_retrieve is True:
-
+    def retrieve(self, section, option, typus=Any, *, fallback_section: str = None, fallback_option: str = None, direct_fallback=Fallback.NULL, mod_func: Callable = None):
+        if self.read_before_retrieve is True or self.file_hash_when_loaded != self.get_config_file_hash():
             self.read()
+
         raw_data = self.get(section=section, option=option, fallback=None)
         raw_data = raw_data if raw_data not in ['', None] else self.defaults().get(option, None)
 
@@ -397,6 +405,9 @@ class SingleAccessConfigHandler(ConfigHandler):
 
     def read(self, filename=None):
         _configfile = self.config_file if filename is None else filename
+        if filename is not None:
+            self.config_file = filename
+        self.file_hash_when_loaded = self.get_config_file_hash()
         _cleaned_content = []
         _buffered_comment_lines = []
         _current_section = None
@@ -465,7 +476,7 @@ class SingleAccessConfigHandler(ConfigHandler):
         for section in self.sections():
             _out[section] = {}
             for option in self.options(section):
-                value = self.retrieve(section, option, direct_fallback=None)
+                value = self.retrieve(section, option, typus=str, direct_fallback=None)
                 _out[section][option] = self._auto_convert_value(value)
         return _out
 
