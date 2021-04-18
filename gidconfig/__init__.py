@@ -7,3 +7,7 @@ __version__ = '0.2.2'
 
 from .standard import *
 from .data import *
+import logging
+import gidlogger as glog
+
+log = glog.library_base_logger(__name__)

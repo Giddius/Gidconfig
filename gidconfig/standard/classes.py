@@ -15,18 +15,18 @@ from fuzzywuzzy import fuzz
 
 # * Gid Imports -->
 import gidlogger as glog
-
+import logging
 # * Local Imports -->
 from gidconfig.data.enums import Get, Fallback
 from gidconfig.utility.functions import readit
+from gidconfig.utility.decorators import debug_timing_print, debug_timing_log
 # endregion [Imports]
 
 
 # region [Logging]
 
-log = glog.aux_logger(__name__)
+log = glog.aux_library_logger(__name__)
 log.info(glog.imported(__name__))
-
 # endregion [Logging]
 
 
@@ -56,6 +56,7 @@ class ConfigHandler(configparser.ConfigParser):
         self.auto_save = auto_save
         self._method_select = {Get.basic: self.get, Get.boolean: self.getboolean, Get.int: self.getint, Get.list: self.getlist, Get.path: self.get_path, Get.datetime: self.get_datetime}
         self.annotation_replacements = {'[DEFAULT]': 'Options in this section are used if those options are not set in a Section'}
+
         if self.auto_read is True:
             self.read(self.config_file)
 
@@ -252,6 +253,7 @@ class SingleAccessConfigHandler(ConfigHandler):
                             Tuple[bool]: self._as_tuple_bool,
                             bool: self._as_bool}
 
+    @debug_timing_log(log)
     def get_config_file_hash(self, in_file=None):
         _file = self.config_file if in_file is None else in_file
         with open(_file, 'rb') as f:
@@ -275,8 +277,10 @@ class SingleAccessConfigHandler(ConfigHandler):
             _out.append(line)
         return '\n'.join(_out)
 
+    @debug_timing_log(log)
     def retrieve(self, section, option, typus=Any, *, fallback_section: str = None, fallback_option: str = None, direct_fallback=Fallback.NULL, mod_func: Callable = None):
         if self.read_before_retrieve is True or self.file_hash_when_loaded != self.get_config_file_hash():
+            log.debug("config file %s has changed content", os.path.basename(self.config_file))
             self.read()
 
         raw_data = self.get(section=section, option=option, fallback=None)
@@ -292,7 +296,7 @@ class SingleAccessConfigHandler(ConfigHandler):
             else:
                 if self.has_section(section) is False:
                     raise configparser.NoSectionError(section)
-                elif self.has_option(section, option) is False:
+                if self.has_option(section, option) is False:
                     raise configparser.NoOptionError(option, section)
 
         data = self.typus_table.get(typus)(raw_data)
@@ -394,6 +398,7 @@ class SingleAccessConfigHandler(ConfigHandler):
         data += ', ' + value
         self.set(section, option, data)
 
+    @debug_timing_log(log)
     def save(self, filename=None):
         filename = self.config_file if filename is None else filename
         with open(filename, 'w') as f:
@@ -403,6 +408,7 @@ class SingleAccessConfigHandler(ConfigHandler):
     async def async_save(self, filename=None):
         await asyncio.to_thread(self.save, filename=filename)
 
+    @debug_timing_log(log)
     def read(self, filename=None):
         _configfile = self.config_file if filename is None else filename
         if filename is not None:
@@ -468,6 +474,7 @@ class SingleAccessConfigHandler(ConfigHandler):
             return False
         return value
 
+    @debug_timing_log(log)
     def to_dict(self):
         _out = {'default': {}}
         for default_option, default_value in self.defaults().items():

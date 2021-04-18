@@ -7,7 +7,7 @@ import gidlogger as glog
 
 # region [Logging]
 
-log = glog.aux_logger(__name__)
+log = glog.aux_library_logger(__name__)
 log.info(glog.imported(__name__))
 
 # endregion [Logging]
