@@ -403,6 +403,11 @@ class SingleAccessConfigHandler(ConfigHandler):
         data += ', ' + value
         self.set(section, option, data)
 
+    def add_section(self, section: str) -> None:
+        super().add_section(section)
+        if self.auto_save is True:
+            self.save()
+
     @debug_timing_log(log)
     def save(self, filename=None):
         filename = self.config_file if filename is None else filename
