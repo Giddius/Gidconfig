@@ -141,6 +141,11 @@ class ConfigHandler(configparser.ConfigParser):
         if self.auto_save is True:
             self.save()
 
+    def add_section(self, section: str) -> None:
+        super().add_section(section)
+        if self.auto_save is True:
+            self.save()
+
     def set(self, section, option, value):
         if isinstance(value, (list, set, tuple)):
             value = ', '.join(list(map(str, value)))
