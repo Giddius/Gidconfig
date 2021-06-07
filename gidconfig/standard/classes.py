@@ -284,7 +284,7 @@ class SingleAccessConfigHandler(ConfigHandler):
     def retrieve(self, section, option, typus=Any, *, fallback_section: str = None, fallback_option: str = None, direct_fallback=Fallback.NULL, mod_func: Callable = None):
         if os.getenv('LOG_CONFIG_RETRIEVE') == '1':
             log.info("++ Config Value rerieve requested from %s, section=%s, option=%s, typus=%s, fallback_section=%s, fallback_option=%s, direct_fallback=%s ++",
-                     self.config_file, section, option, str(typus), fallback_section, fallback_option, direct_fallback)
+                     os.path.basename(self.config_file).split('.')[0].upper(), section, option, str(typus), fallback_section, fallback_option, direct_fallback)
         if self.read_before_retrieve is True or self.file_hash_when_loaded != self.get_config_file_hash():
             log.debug("config file %s has changed content", os.path.basename(self.config_file))
             self.read()
