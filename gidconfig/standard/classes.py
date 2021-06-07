@@ -409,7 +409,6 @@ class SingleAccessConfigHandler(ConfigHandler):
         if self.auto_save is True:
             self.save()
 
-    @debug_timing_log(log)
     def save(self, filename=None):
         filename = self.config_file if filename is None else filename
         with open(filename, 'w') as f:
@@ -419,7 +418,6 @@ class SingleAccessConfigHandler(ConfigHandler):
     async def async_save(self, filename=None):
         await asyncio.to_thread(self.save, filename=filename)
 
-    @debug_timing_log(log)
     def read(self, filename=None):
         _configfile = self.config_file if filename is None else filename
         if filename is not None:
@@ -485,7 +483,6 @@ class SingleAccessConfigHandler(ConfigHandler):
             return False
         return value
 
-    @debug_timing_log(log)
     def to_dict(self):
         _out = {'default': {}}
         for default_option, default_value in self.defaults().items():
