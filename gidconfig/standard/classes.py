@@ -258,7 +258,6 @@ class SingleAccessConfigHandler(ConfigHandler):
                             Tuple[bool]: self._as_tuple_bool,
                             bool: self._as_bool}
 
-    @debug_timing_log(log)
     def get_config_file_hash(self, in_file=None):
         _file = self.config_file if in_file is None else in_file
         with open(_file, 'rb') as f:
@@ -282,7 +281,6 @@ class SingleAccessConfigHandler(ConfigHandler):
             _out.append(line)
         return '\n'.join(_out)
 
-    @debug_timing_log(log)
     def retrieve(self, section, option, typus=Any, *, fallback_section: str = None, fallback_option: str = None, direct_fallback=Fallback.NULL, mod_func: Callable = None):
         if os.getenv('LOG_CONFIG_RETRIEVE') == '1':
             log.info("++ Config Value rerieve requested from %s, section=%s, option=%s, typus=%s, fallback_section=%s, fallback_option=%s, direct_fallback=%s ++",
