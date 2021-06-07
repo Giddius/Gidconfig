@@ -286,6 +286,7 @@ class SingleAccessConfigHandler(ConfigHandler):
             log.debug("++ Config Value retrieve requested from %s, section=%s, option=%s, typus=%s, fallback_section=%s, fallback_option=%s, direct_fallback=%s ++",
                       os.path.basename(self.config_file).split('.')[0].upper(), section, option, str(typus), fallback_section, fallback_option, direct_fallback)
         if self.read_before_retrieve is True:
+            log.debug("reading config file %s, because 'read_before_retrieve' is set to %s", os.path.basename(self.config_file), str(self.read_before_retrieve))
             self.read()
         elif self.file_hash_when_loaded != self.get_config_file_hash():
             log.debug("config file %s has changed content", os.path.basename(self.config_file))
