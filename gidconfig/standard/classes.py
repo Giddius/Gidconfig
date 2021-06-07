@@ -283,7 +283,7 @@ class SingleAccessConfigHandler(ConfigHandler):
 
     def retrieve(self, section, option, typus=Any, *, fallback_section: str = None, fallback_option: str = None, direct_fallback=Fallback.NULL, mod_func: Callable = None):
         if os.getenv('LOG_CONFIG_RETRIEVE') == '1':
-            log.debug("++ Config Value rerieve requested from %s, section=%s, option=%s, typus=%s, fallback_section=%s, fallback_option=%s, direct_fallback=%s ++",
+            log.debug("++ Config Value retrieve requested from %s, section=%s, option=%s, typus=%s, fallback_section=%s, fallback_option=%s, direct_fallback=%s ++",
                       os.path.basename(self.config_file).split('.')[0].upper(), section, option, str(typus), fallback_section, fallback_option, direct_fallback)
         if self.read_before_retrieve is True:
             self.read()
