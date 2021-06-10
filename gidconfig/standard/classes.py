@@ -209,7 +209,8 @@ class SingleAccessConfigHandler(ConfigHandler):
                                 'list_delimiter',
                                 'comment_marker',
                                 'top_comment',
-                                'read_before_retrieve']
+                                'read_before_retrieve',
+                                'check_changed']
 
     default_settings = {"auto_read": True,
                         "auto_save": True,
@@ -217,12 +218,13 @@ class SingleAccessConfigHandler(ConfigHandler):
                         "list_delimiter": ',',
                         "comment_marker": '#',
                         "comment_prefixes": '~',
-                        "read_before_retrieve": False}
+                        "read_before_retrieve": False,
+                        'check_changed': False}
 
     bool_true_values = {'yes', 'true', '+', 'y', 'on', 'enabled', 'positive'}
     bool_false_values = {'no', 'false', '-', 'n', 'off', 'disabled', 'negative'}
 
-    def __init__(self, config_file=None, auto_read=True, auto_save=True, allow_no_value=True, list_delimiter=',', read_before_retrieve=False,check_changed:bool=False, comment_marker='#', top_comment: Union[str, Iterable] = None, comment_prefixes='~', ** kwargs):
+    def __init__(self, config_file=None, auto_read=True, auto_save=True, allow_no_value=True, list_delimiter=',', read_before_retrieve=False, check_changed: bool = False, comment_marker='#', top_comment: Union[str, Iterable] = None, comment_prefixes='~', ** kwargs):
         self.section_comments = {}
         self.read_before_retrieve = read_before_retrieve
         self.check_changed = check_changed
