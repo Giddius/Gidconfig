@@ -222,9 +222,10 @@ class SingleAccessConfigHandler(ConfigHandler):
     bool_true_values = {'yes', 'true', '+', 'y', 'on', 'enabled', 'positive'}
     bool_false_values = {'no', 'false', '-', 'n', 'off', 'disabled', 'negative'}
 
-    def __init__(self, config_file=None, auto_read=True, auto_save=True, allow_no_value=True, list_delimiter=',', read_before_retrieve=False, comment_marker='#', top_comment: Union[str, Iterable] = None, comment_prefixes='~', ** kwargs):
+    def __init__(self, config_file=None, auto_read=True, auto_save=True, allow_no_value=True, list_delimiter=',', read_before_retrieve=False,check_changed:bool=False, comment_marker='#', top_comment: Union[str, Iterable] = None, comment_prefixes='~', ** kwargs):
         self.section_comments = {}
         self.read_before_retrieve = read_before_retrieve
+        self.check_changed = check_changed
         self.section_header_size = 150
         self.section_header_chars = {'top': '▲', 'bottom': '▼', 'middle': '▌'}
         self.comment_marker = comment_marker
@@ -288,9 +289,10 @@ class SingleAccessConfigHandler(ConfigHandler):
         if self.read_before_retrieve is True:
             log.debug("reading config file %s, because 'read_before_retrieve' is set to %s", os.path.basename(self.config_file), str(self.read_before_retrieve))
             self.read()
-        elif self.file_hash_when_loaded != self.get_config_file_hash():
-            log.debug("config file %s has changed content", os.path.basename(self.config_file))
-            self.read()
+        elif self.check_changed is True:
+            if self.file_hash_when_loaded != self.get_config_file_hash():
+                log.debug("config file %s has changed content", os.path.basename(self.config_file))
+                self.read()
 
         raw_data = self.get(section=section, option=option, fallback=None)
         raw_data = raw_data if raw_data not in ['', None] else self.defaults().get(option, None)
