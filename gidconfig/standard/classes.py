@@ -273,7 +273,7 @@ class SingleAccessConfigHandler(ConfigHandler):
             conv_value = self._auto_convert_value(value)
             alias_names = {name, name.casefold()}
             for alias in alias_names:
-                _out[alias] = value
+                _out[alias] = conv_value
 
         return _out
 
