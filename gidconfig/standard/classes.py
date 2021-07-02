@@ -267,6 +267,17 @@ class SingleAccessConfigHandler(ConfigHandler):
             return md5(f.read()).hexdigest()
 
     @property
+    def env(self):
+        _out = {}
+        for name, value in os.environ.items():
+            conv_value = self._auto_convert_value(value)
+            alias_names = {name, name.casefold()}
+            for alias in alias_names:
+                _out[alias] = value
+
+        return _out
+
+    @property
     def top_comment(self):
         return self._top_comment
 
@@ -285,9 +296,7 @@ class SingleAccessConfigHandler(ConfigHandler):
         return '\n'.join(_out)
 
     def retrieve(self, section, option, typus=Any, *, fallback_section: str = None, fallback_option: str = None, direct_fallback=Fallback.NULL, mod_func: Callable = None):
-        if os.getenv('LOG_CONFIG_RETRIEVE') == '1':
-            log.debug("++ Config Value retrieve requested from %s, section=%s, option=%s, typus=%s, fallback_section=%s, fallback_option=%s, direct_fallback=%s ++",
-                      os.path.basename(self.config_file).split('.')[0].upper(), section, option, str(typus), fallback_section, fallback_option, direct_fallback)
+
         if self.read_before_retrieve is True:
             log.debug("reading config file %s, because 'read_before_retrieve' is set to %s", os.path.basename(self.config_file), str(self.read_before_retrieve))
             self.read()
