@@ -269,12 +269,14 @@ class SingleAccessConfigHandler(ConfigHandler):
     @property
     def env(self):
         _out = {}
+        old_delimiter = str(self.list_delimiter)
+        self.list_delimiter = ';'
         for name, value in os.environ.items():
-            conv_value = self._auto_convert_value(value)
+            conv_value = self._auto_convert_value(value, use_zero_one_bool=True)
             alias_names = {name, name.casefold()}
             for alias in alias_names:
                 _out[alias] = conv_value
-
+        self.list_delimiter = old_delimiter
         return _out
 
     @property
@@ -483,7 +485,7 @@ class SingleAccessConfigHandler(ConfigHandler):
             _out.append(self._auto_convert_value(item))
         return _out
 
-    def _auto_convert_value(self, value: str):
+    def _auto_convert_value(self, value: str, use_zero_one_bool: bool = False):
         if value is None:
             return None
         value = value.casefold()
